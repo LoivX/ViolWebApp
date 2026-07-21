@@ -1,11 +1,8 @@
-import {
-  Box,
-  Button,
-  Card,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Stack, Typography, Button } from "@mui/material";
+
+import ClientSearch from "../../components/ClientSearch";
+import EmptyState from "../../components/EmptyState";
+import ConfirmButton from "../../components/ConfirmButton";
 
 export default function Home() {
   return (
@@ -14,10 +11,7 @@ export default function Home() {
         Nuova consegna
       </Typography>
 
-      <TextField
-        fullWidth
-        label="Cerca cliente..."
-      />
+      <ClientSearch />
 
       <Button
         variant="contained"
@@ -26,24 +20,9 @@ export default function Home() {
         + Aggiungi articolo
       </Button>
 
-      <Card
-        sx={{
-          p: 3,
-          textAlign: "center",
-        }}
-      >
-        Nessun articolo inserito
-      </Card>
+      <EmptyState />
 
-      <Box sx={{ flexGrow: 1 }} />
-
-      <Button
-        variant="contained"
-        size="large"
-        fullWidth
-      >
-        Conferma consegna
-      </Button>
+      <ConfirmButton />
     </Stack>
   );
 }
