@@ -19,3 +19,37 @@ services:
     stdin_open: true
 
     tty: true
+
+    depends_on:
+      - backend
+
+    networks:
+      - violapp_network
+
+  backend:
+    build: 
+      context: .
+      dockerfile: docker/backend/Dockerfile
+
+    container_name: AppVIOL_backend
+
+    working_dir: /app
+
+    volumes:
+      - .:/app
+
+    ports:
+      - "8080:8080"
+
+    stdin_open: true
+
+    tty: true
+
+    command: sleep infinity
+
+    networks:
+      - violapp_network
+
+networks:
+  violapp_network:
+    driver: bridge
