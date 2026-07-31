@@ -4,14 +4,14 @@ services:
 
     build:
       context: .
-      dockerfile: docker/frontend/Dockerfile
+      dockerfile: ./docker/frontend/Dockerfile
 
     container_name: AppVIOL_frontend
 
     working_dir: /app
 
     volumes:
-      - .:/app
+      - ./frontend:/app
 
     ports:
       - "5173:5173"
@@ -29,23 +29,21 @@ services:
   backend:
     build: 
       context: .
-      dockerfile: docker/backend/Dockerfile
+      dockerfile: ./docker/backend/Dockerfile
 
     container_name: AppVIOL_backend
 
     working_dir: /app
 
     volumes:
-      - .:/app
+      - ./backend:/app
 
     ports:
-      - "8080:8080"
+      - "8000:8000"
 
     stdin_open: true
 
     tty: true
-
-    command: sleep infinity
 
     networks:
       - violapp_network
