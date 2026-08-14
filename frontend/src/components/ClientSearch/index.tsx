@@ -1,9 +1,15 @@
-import { TextField } from "@mui/material";
+import { Autocomplete, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import { cercaClienti } from "../../services/api";
 import type { Cliente } from "../../types/cliente";
 
-export default function ClientSearch() {
+type ClientSearchProps = {
+  onSelectCliente: (cliente: Cliente | null) => void;
+};
+
+export default function ClientSearch({
+  onSelectCliente,
+}: ClientSearchProps) {
   const [testoCliente, setTestoCliente] = useState("");
   const [clienti, setClienti] = useState<Cliente[]>([]);
 
@@ -12,35 +18,44 @@ export default function ClientSearch() {
       return;
     }
 
-    async function cerca() {
+    const timer = setTimeout(async () => {
       try {
         const risultati = await cercaClienti(testoCliente);
         setClienti(risultati);
       } catch (errore) {
         console.error(errore);
       }
-    }
+    }, 300);
 
-    cerca();
+    return () => clearTimeout(timer);
   }, [testoCliente]);
 
   const clientiVisibili =
     testoCliente.length < 2 ? [] : clienti;
 
   return (
-    <>
-      <TextField
-        fullWidth
-        label="Cerca cliente..."
-        value={testoCliente}
-        onChange={(e) => setTestoCliente(e.target.value)}
-      />
+    <Autocomplete
+      options={clientiVisibili}
 
-      {clientiVisibili.map((cliente) => (
-        <div key={cliente.codice}>
-          {cliente.nome}
-        </div>
-      ))}
-    </>
+      getOptionLabel={(cliente) => cliente.nome}
+
+      onChange={(_, cliente) => {
+        onSelectCliente(cliente);
+      }}
+
+      inputValue={testoCliente}
+
+      onInputChange={(_, nuovoTesto) => {
+        setTestoCliente(nuovoTesto);
+      }}
+
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          fullWidth
+          label="Cerca cliente..."
+        />
+      )}
+    />
   );
 }
