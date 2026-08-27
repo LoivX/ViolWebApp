@@ -25,6 +25,8 @@ services:
 
     networks:
       - violapp_network
+    
+    command: npm run dev
 
   backend:
     build: 
