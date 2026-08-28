@@ -3,13 +3,13 @@ import { useEffect, useState } from "react";
 import { cercaClienti } from "../../services/api";
 import type { Cliente } from "../../types/cliente";
 
-type ClientSearchProps = {
+type ClientSelectionProps = {
   onSelectCliente: (cliente: Cliente | null) => void;
 };
 
-export default function ClientSearch({
+export default function ClientSelection({
   onSelectCliente,
-}: ClientSearchProps) {
+}: ClientSelectionProps) {
   const [testoCliente, setTestoCliente] = useState("");
   const [clienti, setClienti] = useState<Cliente[]>([]);
 

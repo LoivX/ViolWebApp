@@ -1,7 +1,7 @@
 import { Autocomplete, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
-import { cercaArticoli } from "../../services/api";
-import type { Articolo } from "../../types/articolo";
+import { cercaArticoli } from "../../../services/api";
+import type { Articolo } from "../../../types/articolo";
 
 type ArticleSearchProps = {
   onSelectArticolo: (articolo: Articolo | null) => void;
@@ -30,14 +30,13 @@ export default function ArticleSearch({
     return () => clearTimeout(timer);
   }, [testoArticolo]);
 
-  const articoliVisibili =
-    testoArticolo.length < 2 ? [] : articoli;
+  const articoliVisibili = testoArticolo.length < 2 ? [] : articoli;
 
   return (
     <Autocomplete
       options={articoliVisibili}
       getOptionLabel={(articolo) => articolo.nome}
-      
+
       onChange={(_, articolo) => {
         onSelectArticolo(articolo);
       }}
@@ -49,11 +48,7 @@ export default function ArticleSearch({
       }}
 
       renderInput={(params) => (
-        <TextField
-          {...params}
-          fullWidth
-          label="Cerca articolo..."
-        />
+        <TextField {...params} fullWidth label="Cerca articolo..." />
       )}
     />
   );

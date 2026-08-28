@@ -1,22 +1,56 @@
 import { Stack, Typography, Button } from "@mui/material";
-
-import ClientSearch from "../../components/ClientSearch";
-import ArticleSearch from "../../components/ArticleSearch";
-import EmptyState from "../../components/EmptyState";
-import ConfirmButton from "../../components/ConfirmButton";
-
 import { useState } from "react";
+
+import ClientSelection from "../../components/ClientSelection";
+import ArticleSelection from "../../components/ArticleSelection";
+import ConfirmButton from "../../components/ConfirmButton";
+import ArticleList from "../../components/ArticleList";
+
 import type { Cliente } from "../../types/cliente";
-import type { Articolo } from "../../types/articolo";
+import type { RigaOrdine } from "../../types/ordine";
 
 export default function Home() {
-  const [clienteSelezionato, setClienteSelezionato] = useState<Cliente | null>(
-    null
-  );
-  const [articoloSelezionato, setArticoloSelezionato] =
-    useState<Articolo | null>(null);
-  const [mostraClienteSelezionato, setMostraClienteSelezionato] =
-    useState(false);
+  const [clienteSelezionato, setClienteSelezionato] = useState<Cliente | null>(null);
+  const [mostraClienteSelezionato, setMostraClienteSelezionato] = useState(false);
+
+  const [righeOrdine, setRigheOrdine] = useState<RigaOrdine[]>([]);
+
+  function aggiungiArticolo(
+    articolo: RigaOrdine["articolo"],
+    quantita: number
+  ) {
+    setRigheOrdine((precedenti) => {
+      const esistente = precedenti.find(
+        (riga) => riga.articolo.codice === articolo.codice
+      );
+
+      if (esistente) {
+        return precedenti.map((riga) =>
+          riga.articolo.codice === articolo.codice
+            ? {
+                ...riga,
+                quantita: riga.quantita + quantita,
+              }
+            : riga
+        );
+      }
+
+      return [
+        ...precedenti,
+        {
+          articolo,
+          quantita,
+        },
+      ];
+    });
+  }
+function rimuoviArticolo(codiceArticolo: string) {
+    setRigheOrdine((precedenti) =>
+      precedenti.filter(
+        (riga) => riga.articolo.codice !== codiceArticolo
+      )
+    );
+  }
 
   return (
     <Stack spacing={3}>
@@ -25,7 +59,7 @@ export default function Home() {
       <Stack spacing={1}>
         <Typography variant="h6">Cliente</Typography>
 
-        <ClientSearch onSelectCliente={setClienteSelezionato} />
+        <ClientSelection onSelectCliente={setClienteSelezionato} />
         <Button
           variant="contained"
           size="small"
@@ -40,19 +74,9 @@ export default function Home() {
 
       <Stack spacing={1}>
         <Typography variant="h6">Articoli</Typography>
-
-        <ArticleSearch onSelectArticolo={setArticoloSelezionato} />
-        {articoloSelezionato && (
-          <div>Articolo selezionato: {articoloSelezionato.nome}</div>
-        )}
-        <Button 
-        variant="contained" 
-        size="small">
-          + Aggiungi articolo
-        </Button>
+        <ArticleSelection onAddArticolo={aggiungiArticolo} />
+        <ArticleList righe={righeOrdine} onRemove={rimuoviArticolo} />
       </Stack>
-
-      <EmptyState />
 
       <ConfirmButton />
     </Stack>
