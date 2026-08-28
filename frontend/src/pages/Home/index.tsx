@@ -1,4 +1,4 @@
-import { Stack, Typography, Button } from "@mui/material";
+import { Stack, Typography} from "@mui/material";
 import { useState } from "react";
 
 import ClientSelection from "../../components/ClientSelection";
@@ -11,7 +11,6 @@ import type { RigaOrdine } from "../../types/ordine";
 
 export default function Home() {
   const [clienteSelezionato, setClienteSelezionato] = useState<Cliente | null>(null);
-  const [mostraClienteSelezionato, setMostraClienteSelezionato] = useState(false);
 
   const [righeOrdine, setRigheOrdine] = useState<RigaOrdine[]>([]);
 
@@ -74,17 +73,10 @@ export default function Home() {
       <Stack spacing={1}>
         <Typography variant="h6">Cliente</Typography>
 
-        <ClientSelection onSelectCliente={setClienteSelezionato} />
-        <Button
-          variant="contained"
-          size="small"
-          onClick={() => setMostraClienteSelezionato(true)}
-        >
-          Seleziona cliente
-        </Button>
-        {mostraClienteSelezionato && (
-          <div>Cliente Selezionato: {clienteSelezionato?.nome}</div>
-        )}
+        <ClientSelection     
+          cliente={clienteSelezionato}
+          onSelectCliente={setClienteSelezionato} 
+        />
       </Stack>
 
       <Stack spacing={1}>
