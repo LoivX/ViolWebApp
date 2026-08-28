@@ -1,4 +1,4 @@
-import { Button, Stack, Typography } from "@mui/material";
+import { Button, Stack } from "@mui/material";
 import { useState } from "react";
 
 import ArticleSearch from "./ArticleSearch";
@@ -16,6 +16,8 @@ export default function ArticleSelection({
   const [articoloSelezionato, setArticoloSelezionato] =
     useState<Articolo | null>(null);
 
+  const [testoArticolo, setTestoArticolo] = useState("");
+  
   const [quantita, setQuantita] = useState(1);
 
   function aggiungiArticolo() {
@@ -32,27 +34,35 @@ export default function ArticleSelection({
 
   return (
     <Stack spacing={1}>
-      <ArticleSearch
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{ alignItems: "center" }}
+      >
+        <ArticleSearch
+          valore={articoloSelezionato}
+          testo={testoArticolo}
           onSelectArticolo={setArticoloSelezionato}
+          onChangeTesto={setTestoArticolo}
         />
 
-      <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-        <Typography sx={{ fontWeight: "italic" }}>
-          Quantità:
-        </Typography>
         <QuantitySelection
           quantita={quantita}
           onChange={setQuantita}
         />
 
-        <Button
-          variant="contained"
-          onClick={aggiungiArticolo}
-          disabled={!articoloSelezionato}
-        >
-          + Aggiungi
-        </Button>
       </Stack>
+      <Button
+        variant="contained"
+        size="small"
+        onClick={aggiungiArticolo}
+        disabled={!articoloSelezionato}
+        sx={{
+          whiteSpace: "nowrap",
+        }}
+      >
+        + Aggiungi
+      </Button>
     </Stack>
   );
 }

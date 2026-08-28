@@ -4,23 +4,28 @@ import { cercaArticoli } from "../../../services/api";
 import type { Articolo } from "../../../types/articolo";
 
 type ArticleSearchProps = {
+  valore: Articolo | null;
+  testo: string;
   onSelectArticolo: (articolo: Articolo | null) => void;
+  onChangeTesto: (testo: string) => void;
 };
 
 export default function ArticleSearch({
+  valore,
+  testo,
   onSelectArticolo,
+  onChangeTesto,
 }: ArticleSearchProps) {
-  const [testoArticolo, setTestoArticolo] = useState("");
   const [articoli, setArticoli] = useState<Articolo[]>([]);
 
   useEffect(() => {
-    if (testoArticolo.length < 2) {
+    if (testo.length < 2) {
       return;
     }
 
     const timer = setTimeout(async () => {
       try {
-        const risultati = await cercaArticoli(testoArticolo);
+        const risultati = await cercaArticoli(testo);
         setArticoli(risultati);
       } catch (errore) {
         console.error(errore);
@@ -28,27 +33,32 @@ export default function ArticleSearch({
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [testoArticolo]);
-
-  const articoliVisibili = testoArticolo.length < 2 ? [] : articoli;
+  }, [testo]);
 
   return (
     <Autocomplete
-      options={articoliVisibili}
+      fullWidth
+      options={articoli}
+      value={valore}
       getOptionLabel={(articolo) => articolo.nome}
-
+      
       onChange={(_, articolo) => {
         onSelectArticolo(articolo);
       }}
-
-      inputValue={testoArticolo}
-
+      inputValue={testo}
       onInputChange={(_, nuovoTesto) => {
-        setTestoArticolo(nuovoTesto);
-      }}
+        onChangeTesto(nuovoTesto);
 
+          if (nuovoTesto.length < 2) {
+            setArticoli([]);
+          } 
+      }}
+      
       renderInput={(params) => (
-        <TextField {...params} fullWidth label="Cerca articolo..." />
+        <TextField
+          {...params}
+          label="Cerca articolo..."
+        />
       )}
     />
   );

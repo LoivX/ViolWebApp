@@ -44,10 +44,25 @@ export default function Home() {
       ];
     });
   }
-function rimuoviArticolo(codiceArticolo: string) {
+  function rimuoviArticolo(codiceArticolo: string) {
     setRigheOrdine((precedenti) =>
       precedenti.filter(
         (riga) => riga.articolo.codice !== codiceArticolo
+      )
+    );
+  }
+  function modificaQuantita(
+    codiceArticolo: string,
+    nuovaQuantita: number
+  ) {
+    setRigheOrdine((precedenti) =>
+      precedenti.map((riga) =>
+        riga.articolo.codice === codiceArticolo
+          ? {
+              ...riga,
+              quantita: nuovaQuantita,
+            }
+          : riga
       )
     );
   }
@@ -75,7 +90,11 @@ function rimuoviArticolo(codiceArticolo: string) {
       <Stack spacing={1}>
         <Typography variant="h6">Articoli</Typography>
         <ArticleSelection onAddArticolo={aggiungiArticolo} />
-        <ArticleList righe={righeOrdine} onRemove={rimuoviArticolo} />
+        <ArticleList 
+          righe={righeOrdine} 
+          onRemove={rimuoviArticolo}
+          onChangeQuantity={modificaQuantita} 
+        />
       </Stack>
 
       <ConfirmButton />

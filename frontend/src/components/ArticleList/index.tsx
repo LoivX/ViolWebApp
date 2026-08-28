@@ -1,20 +1,34 @@
-import { IconButton, Stack, Typography, Paper } from "@mui/material";
+import { IconButton, Stack, Typography, Paper, Divider } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+
+import QuantitySelection from "../ArticleSelection/QuantitySelection";
+
 import type { RigaOrdine } from "../../types/ordine";
 
 type ArticleListProps = {
   righe: RigaOrdine[];
   onRemove: (codiceArticolo: string) => void;
+  onChangeQuantity: (
+    codiceArticolo: string,
+    quantita: number
+  ) => void;
 };
 
 export default function ArticleList({
   righe,
   onRemove,
+  onChangeQuantity,
 }: ArticleListProps) {
   if (righe.length === 0) {
     return (
-      <Paper sx={{ p: 3 }}>
-        <Typography color="text.secondary" align="center">
+      <Paper
+        variant="outlined"
+        sx={{
+          p: 3,
+          textAlign: "center",
+        }}
+      >
+        <Typography color="text.secondary">
           Nessun articolo aggiunto
         </Typography>
       </Paper>
@@ -22,35 +36,62 @@ export default function ArticleList({
   }
 
   return (
-    <Stack spacing={1}>
-      {righe.map((riga) => (
-        <Paper
-          key={riga.articolo.codice}
-          sx={{ p: 2 }}
+    <Paper
+      variant="outlined"
+      sx={{
+        p: 1.5,
+        }}
+    >
+        <Stack 
+          spacing={1.5}
+          divider={<Divider variant="middle" flexItem />}
         >
+        {righe.map((riga) => (
           <Stack
+            key={riga.articolo.codice}
             direction="row"
-            sx={{ alignItems: "center", justifyContent: "space-between" }}
+            spacing={1}
+            sx={{ alignItems: "center" }}
+
           >
-            <div>
-              <Typography sx={{ fontWeight: "bold" }}>
-                {riga.articolo.nome}
-              </Typography>
+            {/* NOME ARTICOLO */}
+            <Typography
+              sx={{
+                flex: 1,
+                fontWeight: 600,
+                minWidth: 0,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {riga.articolo.nome}
+            </Typography>
 
-              <Typography color="text.secondary">
-                Quantità: {riga.quantita}
-              </Typography>
-            </div>
+            {/* QUANTITÀ */}
+            <QuantitySelection
+              quantita={riga.quantita}
+              onChange={(quantita) =>
+                onChangeQuantity(
+                  riga.articolo.codice,
+                  quantita
+                )
+              }
+            />
 
+            {/* RIMUOVI */}
             <IconButton
               color="error"
-              onClick={() => onRemove(riga.articolo.codice)}
+              size="small"
+              onClick={() =>
+                onRemove(riga.articolo.codice)
+              }
+              aria-label="Rimuovi articolo"
             >
-              <DeleteIcon />
+              <DeleteIcon fontSize="small" />
             </IconButton>
           </Stack>
-        </Paper>
-      ))}
-    </Stack>
+        ))}
+        </Stack>
+    </Paper>
   );
 }
