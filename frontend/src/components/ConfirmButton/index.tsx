@@ -1,11 +1,21 @@
 import { Button } from "@mui/material";
 
-export default function ConfirmButton() {
+type ConfirmButtonProps = {
+  disabled: boolean;
+  onClick: () => void;
+};
+
+export default function ConfirmButton({
+  disabled,
+  onClick,
+}: ConfirmButtonProps) {
   return (
     <Button
-      fullWidth
-      size="large"
       variant="contained"
+      size="large"
+      fullWidth
+      disabled={disabled}
+      onClick={onClick}
     >
       Conferma consegna
     </Button>

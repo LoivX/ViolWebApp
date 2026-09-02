@@ -14,6 +14,8 @@ export default function Home() {
 
   const [righeOrdine, setRigheOrdine] = useState<RigaOrdine[]>([]);
 
+  const consegnaNonValida = clienteSelezionato === null || righeOrdine.length === 0;
+
   function aggiungiArticolo(
     articolo: RigaOrdine["articolo"],
     quantita: number
@@ -65,6 +67,12 @@ export default function Home() {
       )
     );
   }
+  function confermaConsegna() {
+  console.log("CLIENTE:", clienteSelezionato);
+  console.log("RIGHE:", righeOrdine);
+  setClienteSelezionato(null);
+  setRigheOrdine([]);
+}
 
   return (
     <Stack spacing={3}>
@@ -89,7 +97,10 @@ export default function Home() {
         />
       </Stack>
 
-      <ConfirmButton />
+      <ConfirmButton 
+        disabled={consegnaNonValida}
+        onClick={confermaConsegna}
+      />
     </Stack>
   );
 }

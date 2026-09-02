@@ -52,17 +52,20 @@ export default function ArticleSelection({
         />
 
       </Stack>
-      <Button
-        variant="contained"
-        size="small"
-        onClick={aggiungiArticolo}
-        disabled={!articoloSelezionato}
-        sx={{
-          whiteSpace: "nowrap",
-        }}
-      >
-        + Aggiungi
-      </Button>
+      
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={aggiungiArticolo}
+          disabled={!articoloSelezionato}
+          sx={{
+            whiteSpace: "nowrap",
+            width: "95%",
+            alignSelf: "center"
+          }}
+        >
+          + Aggiungi
+        </Button>
     </Stack>
   );
 }
