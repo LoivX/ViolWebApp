@@ -64,7 +64,7 @@ export default function ArticleList({
                 textOverflow: "ellipsis",
               }}
             >
-              {riga.articolo.nome}
+              {riga.articolo.descrizione}
             </Typography>
 
             {/* QUANTITÀ */}
