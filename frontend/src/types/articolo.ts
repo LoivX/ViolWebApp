@@ -1,4 +1,6 @@
 export type Articolo = {
   codice: string;
-  nome: string;
+  codiceMnemonico: string;
+  descrizione: string;
+  unitaMisura: string;
 };

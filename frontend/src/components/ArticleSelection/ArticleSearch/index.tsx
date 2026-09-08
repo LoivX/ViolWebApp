@@ -40,7 +40,7 @@ export default function ArticleSearch({
       fullWidth
       options={articoli}
       value={valore}
-      getOptionLabel={(articolo) => articolo.nome}
+      getOptionLabel={(articolo) => articolo.descrizione}
       
       onChange={(_, articolo) => {
         onSelectArticolo(articolo);

@@ -53,3 +53,4 @@ services:
 networks:
   violapp_network:
     driver: bridge
+    external: true

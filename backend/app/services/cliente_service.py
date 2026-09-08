@@ -1,27 +1,59 @@
-clienti = [
-    {
-        "codice": "001",
-        "nome": "ROSSI SRL"
-    },
-    {
-        "codice": "002",
-        "nome": "ROSSINI SPA"
-    },
-    {
-        "codice": "003",
-        "nome": "VERDI SRL"
-    }
-]
+from app.database import get_connection
 
 
 def cerca_clienti(testo: str):
+    connessione = get_connection()
+    cursore = connessione.cursor()
 
-    testo = testo.lower()
+    query = """
+        SELECT
+            RTRIM(CSOTT) AS codice,
+            RTRIM(CODM) AS codiceMnemonico,
+            LTRIM(RTRIM(RAG1)) +
+                CASE
+                    WHEN LTRIM(RTRIM(RAG2)) <> '' THEN
+                        ' ' + LTRIM(RTRIM(RAG2))
+                    ELSE
+                        ''
+                END AS nome
+        FROM dbo.EABANCFGVIOL
+        WHERE
+            RTRIM(CSOTT) LIKE ?
+            OR RTRIM(CODM) LIKE ?
+            OR LTRIM(RTRIM(RAG1)) + ' ' + LTRIM(RTRIM(RAG2)) LIKE ?
+
+        ORDER BY
+            CASE
+                WHEN LTRIM(RTRIM(RAG1)) + ' ' + LTRIM(RTRIM(RAG2)) LIKE ? THEN 0
+                WHEN LTRIM(RTRIM(RAG1)) + ' ' + LTRIM(RTRIM(RAG2)) LIKE ? THEN 1
+                ELSE 2
+            END,
+            RAG1
+    """
+
+    ricerca = f"%{testo}%"
+    ricerca_inizio = f"{testo}%"
+    ricerca_parola = f"% {testo}%"
+
+    cursore.execute(
+        query,
+        ricerca,
+        ricerca,
+        ricerca,
+        ricerca_inizio,
+        ricerca_parola,
+    )
 
     risultati = []
 
-    for cliente in clienti:
-        if testo in cliente["nome"].lower():
-            risultati.append(cliente)
+    for riga in cursore.fetchall():
+        risultati.append({
+            "codice": riga.codice,
+            "codiceMnemonico": riga.codiceMnemonico,
+            "nome": riga.nome.strip(),
+        })
+
+    cursore.close()
+    connessione.close()
 
     return risultati
