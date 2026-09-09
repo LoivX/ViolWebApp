@@ -1,6 +1,9 @@
-import { Autocomplete, TextField } from "@mui/material";
+import { Autocomplete, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
+
 import { cercaArticoli } from "../../../services/api";
+import { formattaTestoDatabase } from "../../../utils/formattaTestoDatabase";
+
 import type { Articolo } from "../../../types/articolo";
 
 type ArticleSearchProps = {
@@ -40,8 +43,11 @@ export default function ArticleSearch({
       fullWidth
       options={articoli}
       value={valore}
-      getOptionLabel={(articolo) => articolo.descrizione}
-      
+      getOptionLabel={(articolo) =>
+        formattaTestoDatabase(
+          articolo.descrizione
+        )
+      }
       onChange={(_, articolo) => {
         onSelectArticolo(articolo);
       }}
@@ -49,11 +55,26 @@ export default function ArticleSearch({
       onInputChange={(_, nuovoTesto) => {
         onChangeTesto(nuovoTesto);
 
-          if (nuovoTesto.length < 2) {
-            setArticoli([]);
-          } 
+        if (nuovoTesto.length < 2) {
+          setArticoli([]);
+        }
       }}
-      
+      renderOption={(props, articolo) => (
+        <li {...props}>
+          <Typography
+            sx={{
+              fontWeight: 600,
+              lineHeight: 1.2,
+              whiteSpace: "normal",
+              wordBreak: "break-word",
+            }}
+          >
+            {formattaTestoDatabase(
+              articolo.descrizione
+            )}
+          </Typography>
+        </li>
+      )}
       renderInput={(params) => (
         <TextField
           {...params}

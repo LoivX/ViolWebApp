@@ -1,20 +1,22 @@
+import os
+
 import pyodbc
 
 
-SERVER = "euro2000-sql"
-DATABASE = "euro2000_dev"
-USERNAME = "sa"
-PASSWORD = "PasswordMoltoSicura123!"
-
-
 def get_connection():
-    connection = pyodbc.connect(
-        f"DRIVER={{ODBC Driver 18 for SQL Server}};"
-        f"SERVER={SERVER},1433;"
-        f"DATABASE={DATABASE};"
-        f"UID={USERNAME};"
-        f"PWD={PASSWORD};"
-        f"TrustServerCertificate=yes;"
+    server = os.getenv("DB_SERVER")
+    port = os.getenv("DB_PORT", "1433")
+    database = os.getenv("DB_DATABASE")
+    username = os.getenv("DB_USERNAME")
+    password = os.getenv("DB_PASSWORD")
+
+    connection_string = (
+        "DRIVER={ODBC Driver 18 for SQL Server};"
+        f"SERVER={server},{port};"
+        f"DATABASE={database};"
+        f"UID={username};"
+        f"PWD={password};"
+        "TrustServerCertificate=yes;"
     )
 
-    return connection
+    return pyodbc.connect(connection_string)

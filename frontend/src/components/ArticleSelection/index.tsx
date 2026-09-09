@@ -1,13 +1,17 @@
-import { Button, Stack } from "@mui/material";
+import { Button, Stack, Typography } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import { useState } from "react";
 
 import ArticleSearch from "./ArticleSearch";
-import QuantitySelection from "./QuantitySelection";
+import QuantitySelection from "../QuantitySelection";
 
 import type { Articolo } from "../../types/articolo";
 
 type ArticleSelectionProps = {
-  onAddArticolo: (articolo: Articolo, quantita: number) => void;
+  onAddArticolo: (
+    articolo: Articolo,
+    quantita: number
+  ) => void;
 };
 
 export default function ArticleSelection({
@@ -16,8 +20,9 @@ export default function ArticleSelection({
   const [articoloSelezionato, setArticoloSelezionato] =
     useState<Articolo | null>(null);
 
-  const [testoArticolo, setTestoArticolo] = useState("");
-  
+  const [testoArticolo, setTestoArticolo] =
+    useState("");
+
   const [quantita, setQuantita] = useState(1);
 
   function aggiungiArticolo() {
@@ -25,10 +30,13 @@ export default function ArticleSelection({
       return;
     }
 
-    onAddArticolo(articoloSelezionato, quantita);
+    onAddArticolo(
+      articoloSelezionato,
+      quantita
+    );
 
-    // Reset dopo l'aggiunta
     setArticoloSelezionato(null);
+    setTestoArticolo("");
     setQuantita(1);
   }
 
@@ -37,35 +45,51 @@ export default function ArticleSelection({
       <Stack
         direction="row"
         spacing={1}
-        sx={{ alignItems: "center" }}
+        sx={{
+          alignItems: "center",
+        }}
       >
-        <ArticleSearch
-          valore={articoloSelezionato}
-          testo={testoArticolo}
-          onSelectArticolo={setArticoloSelezionato}
-          onChangeTesto={setTestoArticolo}
-        />
+        <Stack
+          sx={{
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
+          <ArticleSearch
+            valore={articoloSelezionato}
+            testo={testoArticolo}
+            onSelectArticolo={
+              setArticoloSelezionato
+            }
+            onChangeTesto={
+              setTestoArticolo
+            }
+          />
+        </Stack>
 
         <QuantitySelection
           quantita={quantita}
+          unitaMisura={
+            articoloSelezionato?.unitaMisura ||
+            "PZ"
+          }
           onChange={setQuantita}
         />
-
       </Stack>
-      
-        <Button
-          variant="outlined"
-          size="small"
-          onClick={aggiungiArticolo}
-          disabled={!articoloSelezionato}
-          sx={{
-            whiteSpace: "nowrap",
-            width: "95%",
-            alignSelf: "center"
-          }}
-        >
-          + Aggiungi
-        </Button>
+
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={aggiungiArticolo}
+        disabled={!articoloSelezionato}
+        sx={{
+          width: "95%",
+          alignSelf: "center",
+        }}
+      >
+        + Aggiungi
+      </Button>
+
     </Stack>
   );
 }

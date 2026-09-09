@@ -1,9 +1,18 @@
-import {Autocomplete, IconButton, Stack, TextField, Typography} from "@mui/material";
+import {
+  Autocomplete,
+  IconButton,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
 
 import { useEffect, useState } from "react";
+
 import { cercaClienti } from "../../services/api";
+import { formattaTestoDatabase } from "../../utils/formattaTestoDatabase";
+
 import type { Cliente } from "../../types/cliente";
 
 type ClientSelectionProps = {
@@ -17,9 +26,9 @@ export default function ClientSelection({
 }: ClientSelectionProps) {
   const [testoCliente, setTestoCliente] = useState("");
   const [clienti, setClienti] = useState<Cliente[]>([]);
-  const [modificaCliente, setModificaCliente] = useState(
-    cliente === null
-  );
+
+  const [modificaCliente, setModificaCliente] =
+    useState(cliente === null);
 
   useEffect(() => {
     if (testoCliente.length < 2) {
@@ -28,7 +37,10 @@ export default function ClientSelection({
 
     const timer = setTimeout(async () => {
       try {
-        const risultati = await cercaClienti(testoCliente);
+        const risultati = await cercaClienti(
+          testoCliente
+        );
+
         setClienti(risultati);
       } catch (errore) {
         console.error(errore);
@@ -38,7 +50,9 @@ export default function ClientSelection({
     return () => clearTimeout(timer);
   }, [testoCliente]);
 
-  function selezionaCliente(nuovoCliente: Cliente | null) {
+  function selezionaCliente(
+    nuovoCliente: Cliente | null
+  ) {
     onSelectCliente(nuovoCliente);
 
     if (nuovoCliente) {
@@ -55,14 +69,21 @@ export default function ClientSelection({
           border: 1,
           borderColor: "divider",
           borderRadius: 1,
-          px: 2,
-          py: 1,
+          px: 1.5,
+          py: 0.75,
           alignItems: "center",
-          justifyContent: "space-between"
+          justifyContent: "space-between",
         }}
       >
-        <Typography sx={{ fontWeight: 600, flex: 1, minWidth: 0 }}>
-          {cliente.nome}
+        <Typography
+          sx={{
+            fontWeight: 600,
+            flex: 1,
+            minWidth: 0,
+            lineHeight: 1.2,
+          }}
+        >
+          {formattaTestoDatabase(cliente.nome)}
         </Typography>
 
         <IconButton
@@ -81,7 +102,9 @@ export default function ClientSelection({
       fullWidth
       options={clienti}
       value={cliente}
-      getOptionLabel={(cliente) => cliente.nome}
+      getOptionLabel={(cliente) =>
+        formattaTestoDatabase(cliente.nome)
+      }
       onChange={(_, nuovoCliente) => {
         selezionaCliente(nuovoCliente);
       }}
@@ -93,6 +116,18 @@ export default function ClientSelection({
           setClienti([]);
         }
       }}
+      renderOption={(props, cliente) => (
+        <li {...props}>
+          <Typography
+            sx={{
+              fontWeight: 600,
+              lineHeight: 1.2,
+            }}
+          >
+            {formattaTestoDatabase(cliente.nome)}
+          </Typography>
+        </li>
+      )}
       renderInput={(params) => (
         <TextField
           {...params}

@@ -26,4 +26,4 @@ export async function cercaArticoli(testo: string) {
     }
 
     return response.json();
-    }
+}

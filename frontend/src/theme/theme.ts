@@ -42,7 +42,7 @@ const theme = createTheme({
   spacing: 8,
 
   typography: {
-    fontFamily: "Roboto, sans-serif",
+    fontFamily: '"Roboto Condensed", "Roboto", "Arial", "sans-serif"',
 
     h5: {
       fontWeight: 700,

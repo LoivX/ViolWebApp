@@ -1,5 +1,4 @@
 services:
-
   frontend:
 
     build:
@@ -49,6 +48,14 @@ services:
 
     networks:
       - violapp_network
+    
+    environment:
+      DB_SERVER: ${DB_SERVER}
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
 
 networks:
   violapp_network:
