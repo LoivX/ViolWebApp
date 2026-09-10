@@ -16,6 +16,8 @@ import { useState } from "react";
 
 import QuantitySelection from "../QuantitySelection";
 
+import { formattaTestoDatabase } from "../../utils/formattaTestoDatabase";
+
 import type { RigaOrdine } from "../../types/ordine";
 
 type ArticleListProps = {
@@ -45,11 +47,14 @@ export default function ArticleList({
       <Paper
         variant="outlined"
         sx={{
-          p: 3,
+          p: 2,
           textAlign: "center",
         }}
       >
-        <Typography color="text.secondary">
+        <Typography
+          variant="body2"
+          color="text.secondary"
+        >
           Nessun articolo aggiunto
         </Typography>
       </Paper>
@@ -60,11 +65,11 @@ export default function ArticleList({
     <Paper
       variant="outlined"
       sx={{
-        p: 1.25,
+        p: 1,
       }}
     >
       <Stack
-        spacing={1}
+        spacing={0.75}
         divider={
           <Divider
             variant="middle"
@@ -78,14 +83,9 @@ export default function ArticleList({
             riga={riga}
             onRemove={() => onRemove(indice)}
             onChangeQuantity={(quantita) =>
-              onChangeQuantity(
-                indice,
-                quantita
-              )
+              onChangeQuantity(indice, quantita)
             }
-            onChangeDescrizione={(
-              descrizione
-            ) =>
+            onChangeDescrizione={(descrizione) =>
               onChangeDescrizione(
                 indice,
                 descrizione
@@ -101,9 +101,7 @@ export default function ArticleList({
 type ArticleRowProps = {
   riga: RigaOrdine;
   onRemove: () => void;
-  onChangeQuantity: (
-    quantita: number
-  ) => void;
+  onChangeQuantity: (quantita: number) => void;
   onChangeDescrizione: (
     descrizione: string
   ) => void;
@@ -115,142 +113,170 @@ function ArticleRow({
   onChangeQuantity,
   onChangeDescrizione,
 }: ArticleRowProps) {
-  const [modificaDescrizione, setModificaDescrizione] =
-    useState(false);
+  const [modifica, setModifica] = useState(false);
 
-  const [nuovaDescrizione, setNuovaDescrizione] =
-    useState(riga.articolo.descrizione);
+  const [nuovaDescrizione, setNuovaDescrizione] = useState(riga.articolo.descrizione);
+
+  const [nuovaQuantita, setNuovaQuantita] = useState(riga.quantita);
 
   function iniziaModifica() {
     setNuovaDescrizione(
       riga.articolo.descrizione
     );
-    setModificaDescrizione(true);
+
+    setNuovaQuantita(riga.quantita);
+
+    setModifica(true);
   }
 
   function confermaModifica() {
-    const descrizione =
-      nuovaDescrizione.trim();
+    const descrizione = nuovaDescrizione.trim();
 
     if (!descrizione) {
       return;
     }
 
-    onChangeDescrizione(descrizione);
-    setModificaDescrizione(false);
+    onChangeQuantity(nuovaQuantita);
+
+    if (riga.articoloLibero) {
+      onChangeDescrizione(descrizione);
+    }
+
+    setModifica(false);
   }
 
   function annullaModifica() {
     setNuovaDescrizione(
       riga.articolo.descrizione
     );
-    setModificaDescrizione(false);
-  }
 
-  function gestisciTasto(
-    event: React.KeyboardEvent<HTMLInputElement>
-  ) {
-    if (event.key === "Enter") {
-      confermaModifica();
-    }
+    setNuovaQuantita(riga.quantita);
 
-    if (event.key === "Escape") {
-      annullaModifica();
-    }
+    setModifica(false);
   }
 
   return (
     <Stack spacing={0.75}>
-      {modificaDescrizione ? (
+      {/* Riga principale */}
+      <Stack
+        direction="row"
+        spacing={0.5}
+        sx={{
+          alignItems: "center",
+          minWidth: 0,
+        }}
+      >
         <Stack
-          direction="row"
-          spacing={0.5}
           sx={{
-            alignItems: "center",
+            flex: 1,
+            minWidth: 0,
           }}
         >
-          <TextField
-            fullWidth
-            autoFocus
-            size="small"
-            value={nuovaDescrizione}
-            onChange={(event) =>
-              setNuovaDescrizione(
-                event.target.value
-              )
-            }
-            onKeyDown={gestisciTasto}
-          />
-
-          <IconButton
-            size="small"
-            color="success"
-            onClick={confermaModifica}
-            disabled={
-              !nuovaDescrizione.trim()
-            }
-            aria-label="Conferma modifica"
-          >
-            <CheckIcon fontSize="small" />
-          </IconButton>
-
-          <IconButton
-            size="small"
-            onClick={annullaModifica}
-            aria-label="Annulla modifica"
-          >
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        </Stack>
-      ) : (
-        <Stack
-          direction="row"
-          spacing={0.5}
-          sx={{
-            alignItems: "center",
-          }}
-        >
-          <Typography
-            sx={{
-              flex: 1,
-              minWidth: 0,
-              fontWeight: 600,
-              lineHeight: 1.2,
-              overflowWrap: "anywhere",
-            }}
-          >
-            {riga.articolo.descrizione}
-          </Typography>
-
-          <QuantitySelection
-            quantita={riga.quantita}
-            unitaMisura={
-              riga.articolo.unitaMisura ||
-              "PZ"
-            }
-            onChange={onChangeQuantity}
-          />
-
-          {riga.articoloLibero && (
-            <IconButton
+          {modifica && riga.articoloLibero ? (
+            <TextField
+              fullWidth
+              autoFocus
               size="small"
-              onClick={iniziaModifica}
-              aria-label="Modifica descrizione"
+              value={nuovaDescrizione}
+              onChange={(event) =>
+                setNuovaDescrizione(
+                  event.target.value
+                )
+              }
+            />
+          ) : (
+            <Typography
+              sx={{
+                fontWeight: 600,
+                lineHeight: 1.2,
+                overflowWrap: "anywhere",
+              }}
             >
-              <EditIcon fontSize="small" />
-            </IconButton>
+              {formattaTestoDatabase(
+                riga.articolo.descrizione
+              )}
+            </Typography>
           )}
 
-          <IconButton
-            size="small"
-            color="error"
-            onClick={onRemove}
-            aria-label="Rimuovi articolo"
+          {/* Nascondiamo la caption durante la modifica */}
+          {!modifica && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+            >
+              {riga.quantita}{" "}
+              {riga.articolo.unitaMisura || "PZ"}
+            </Typography>
+          )}
+        </Stack>
+
+        <IconButton
+          size="small"
+          onClick={iniziaModifica}
+          aria-label="Modifica articolo"
+        >
+          <EditIcon fontSize="small" />
+        </IconButton>
+
+        <IconButton
+          size="small"
+          color="error"
+          onClick={onRemove}
+          aria-label="Rimuovi articolo"
+        >
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      </Stack>
+
+      {/* Modifica quantità */}
+      {modifica && (
+        <Stack
+          spacing={0.75}
+          sx={{
+            pl: 0.5,
+            pr: 0.5,
+          }}
+        >
+          <Stack
+            direction="row"
+            sx={{
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
           >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
+            <QuantitySelection
+              quantita={nuovaQuantita}
+              unitaMisura={
+                riga.articolo.unitaMisura || "PZ"
+              }
+              onChange={setNuovaQuantita}
+            />
+
+            <Stack
+              direction="row"
+              spacing={0.25}
+            >
+              <IconButton
+                size="small"
+                color="success"
+                onClick={confermaModifica}
+                aria-label="Conferma modifica"
+              >
+                <CheckIcon fontSize="small" />
+              </IconButton>
+
+              <IconButton
+                size="small"
+                onClick={annullaModifica}
+                aria-label="Annulla modifica"
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Stack>
+          </Stack>
         </Stack>
       )}
     </Stack>
   );
 }
+

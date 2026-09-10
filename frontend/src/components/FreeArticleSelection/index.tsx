@@ -96,10 +96,10 @@ export default function FreeArticleSelection({
         <Typography
           variant="body2"
           sx={{
-            fontWeight: 600,
+            fontWeight: 400,
           }}
         >
-          Articolo fuori campo
+          Articolo libero:
         </Typography>
 
         <Stack
@@ -112,7 +112,7 @@ export default function FreeArticleSelection({
           <TextField
             fullWidth
             autoFocus
-            label="Descrizione articolo"
+            label="Descrivi l'articolo..."
             value={descrizione}
             onChange={(event) =>
               setDescrizione(event.target.value)
@@ -130,13 +130,16 @@ export default function FreeArticleSelection({
           direction="row"
           spacing={1}
           sx={{
-            justifyContent: "flex-end",
+            justifyContent: "center",
           }}
         >
           <Button
-            variant="text"
+            variant="outlined"
             size="small"
             onClick={annulla}
+            sx={{
+              width: "50%",
+            }}
           >
             Annulla
           </Button>
@@ -146,6 +149,9 @@ export default function FreeArticleSelection({
             size="small"
             onClick={aggiungi}
             disabled={!descrizione.trim()}
+            sx={{
+              width: "50%",
+            }}
           >
             Aggiungi
           </Button>
