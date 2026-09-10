@@ -1,4 +1,4 @@
-import { Autocomplete, TextField, Typography } from "@mui/material";
+import { Autocomplete, Stack, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 
 import { cercaArticoli } from "../../../services/api";
@@ -42,6 +42,8 @@ export default function ArticleSearch({
     <Autocomplete
       fullWidth
       options={articoli}
+      filterOptions={(options) => options}
+      getOptionKey={(articolo) => articolo.codice}
       value={valore}
       getOptionLabel={(articolo) =>
         formattaTestoDatabase(
@@ -59,22 +61,34 @@ export default function ArticleSearch({
           setArticoli([]);
         }
       }}
-      renderOption={(props, articolo) => (
-        <li {...props}>
-          <Typography
-            sx={{
-              fontWeight: 600,
-              lineHeight: 1.2,
-              whiteSpace: "normal",
-              wordBreak: "break-word",
-            }}
-          >
-            {formattaTestoDatabase(
-              articolo.descrizione
-            )}
-          </Typography>
-        </li>
-      )}
+      renderOption={(props, articolo) => {
+        const {key, ...rest} = props;
+        return (
+          <li key={key} {...rest}>
+            <Stack direction="column" spacing={0.5}>
+              <Typography
+                sx={{
+                  fontWeight: 600,
+                  lineHeight: 1.2,
+                  whiteSpace: "normal",
+                  wordBreak: "break-word",
+                }}
+              >
+                {formattaTestoDatabase(
+                  articolo.descrizione
+                )}
+              </Typography>
+
+              <Typography
+                variant="caption"
+                color="text.secondary"
+              >
+                {` Cod. ${articolo.codice}`}
+              </Typography>
+            </Stack>
+          </li>
+        )
+      }}
       renderInput={(params) => (
         <TextField
           {...params}

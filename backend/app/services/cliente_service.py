@@ -13,19 +13,44 @@ def cerca_clienti(testo: str):
                 CASE
                     WHEN LTRIM(RTRIM(RAG2)) <> '' THEN
                         ' ' + LTRIM(RTRIM(RAG2))
-                    ELSE
-                        ''
-                END AS nome
+                    ELSE ''
+                END AS nome,
+            LTRIM(RTRIM(IND)) + ' ' + LTRIM(RTRIM(LOC)) AS indirizzo
         FROM dbo.EABANCFGVIOL
         WHERE
-            RTRIM(CSOTT) LIKE ?
-            OR RTRIM(CODM) LIKE ?
-            OR LTRIM(RTRIM(RAG1)) + ' ' + LTRIM(RTRIM(RAG2)) LIKE ?
-
+            TSOTT = 'C'
+            AND (
+                RTRIM(CSOTT) LIKE ?
+                OR RTRIM(CODM) LIKE ?
+                OR (
+                    LTRIM(RTRIM(RAG1)) +
+                    CASE
+                        WHEN LTRIM(RTRIM(RAG2)) <> '' THEN
+                            ' ' + LTRIM(RTRIM(RAG2))
+                        ELSE ''
+                    END
+                ) LIKE ?
+            )
         ORDER BY
             CASE
-                WHEN LTRIM(RTRIM(RAG1)) + ' ' + LTRIM(RTRIM(RAG2)) LIKE ? THEN 0
-                WHEN LTRIM(RTRIM(RAG1)) + ' ' + LTRIM(RTRIM(RAG2)) LIKE ? THEN 1
+                WHEN (
+                    LTRIM(RTRIM(RAG1)) +
+                    CASE
+                        WHEN LTRIM(RTRIM(RAG2)) <> '' THEN
+                            ' ' + LTRIM(RTRIM(RAG2))
+                        ELSE ''
+                    END
+                ) LIKE ? THEN 0
+
+                WHEN (
+                    LTRIM(RTRIM(RAG1)) +
+                    CASE
+                        WHEN LTRIM(RTRIM(RAG2)) <> '' THEN
+                            ' ' + LTRIM(RTRIM(RAG2))
+                        ELSE ''
+                    END
+                ) LIKE ? THEN 1
+
                 ELSE 2
             END,
             RAG1
@@ -51,6 +76,7 @@ def cerca_clienti(testo: str):
             "codice": riga.codice,
             "codiceMnemonico": riga.codiceMnemonico,
             "nome": riga.nome.strip(),
+            "indirizzo": riga.indirizzo.strip(),
         })
 
     cursore.close()

@@ -27,8 +27,7 @@ export default function ClientSelection({
   const [testoCliente, setTestoCliente] = useState("");
   const [clienti, setClienti] = useState<Cliente[]>([]);
 
-  const [modificaCliente, setModificaCliente] =
-    useState(cliente === null);
+  const [modificaCliente, setModificaCliente] = useState(cliente === null);
 
   useEffect(() => {
     if (testoCliente.length < 2) {
@@ -101,6 +100,8 @@ export default function ClientSelection({
     <Autocomplete
       fullWidth
       options={clienti}
+      filterOptions={(options) => options}
+      getOptionKey={(cliente) => cliente.codice}
       value={cliente}
       getOptionLabel={(cliente) =>
         formattaTestoDatabase(cliente.nome)
@@ -116,18 +117,40 @@ export default function ClientSelection({
           setClienti([]);
         }
       }}
-      renderOption={(props, cliente) => (
-        <li {...props}>
-          <Typography
-            sx={{
-              fontWeight: 600,
-              lineHeight: 1.2,
-            }}
-          >
-            {formattaTestoDatabase(cliente.nome)}
-          </Typography>
-        </li>
-      )}
+      renderOption={(props, cliente) => {
+        const { key, ...optionProps } = props;
+
+        return (
+          <li key={key} {...optionProps}>
+            <Stack spacing={0.25} sx={{ minWidth: 0, width: "100%"}}>
+              <Typography
+                sx={{
+                  fontWeight: 600,
+                  lineHeight: 1.2,
+                }}
+              >
+                {formattaTestoDatabase(cliente.nome)}
+              </Typography>
+
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{    
+                  display: 'block',          // Forza il componente a comportarsi come blocco
+                  minWidth: 0,               // Impedisce al testo di forzare la larghezza del contenitore
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis', 
+                  maxWidth: '100%',            // Assicura che il testo non superi la larghezza del contenitore          
+                }}
+              >
+                {'Cod. ' + cliente.codice}
+                {` · ${cliente.indirizzo}`}
+              </Typography>
+            </Stack>
+          </li>
+        );
+      }}
       renderInput={(params) => (
         <TextField
           {...params}
