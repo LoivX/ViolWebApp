@@ -1,85 +1,186 @@
 from app.database import get_connection
+from app.services.cliente_search import (
+    calcola_punteggio
+)
 
-
-def cerca_clienti(testo: str):
-    connessione = get_connection()
-    cursore = connessione.cursor()
-
-    query = """
+QUERY_CERCA_CLIENTI = """
+    WITH Clienti AS (
         SELECT
             RTRIM(CSOTT) AS codice,
-            RTRIM(CODM) AS codiceMnemonico,
+
             LTRIM(RTRIM(RAG1)) +
                 CASE
                     WHEN LTRIM(RTRIM(RAG2)) <> '' THEN
                         ' ' + LTRIM(RTRIM(RAG2))
-                    ELSE ''
+                    ELSE
+                        ''
                 END AS nome,
+
             LTRIM(RTRIM(IND)) + ' ' + LTRIM(RTRIM(LOC)) AS indirizzo
+
         FROM dbo.EABANCFGVIOL
+
         WHERE
             TSOTT = 'C'
-            AND (
-                RTRIM(CSOTT) LIKE ?
-                OR RTRIM(CODM) LIKE ?
-                OR (
-                    LTRIM(RTRIM(RAG1)) +
-                    CASE
-                        WHEN LTRIM(RTRIM(RAG2)) <> '' THEN
-                            ' ' + LTRIM(RTRIM(RAG2))
-                        ELSE ''
-                    END
-                ) LIKE ?
-            )
-        ORDER BY
-            CASE
-                WHEN (
-                    LTRIM(RTRIM(RAG1)) +
-                    CASE
-                        WHEN LTRIM(RTRIM(RAG2)) <> '' THEN
-                            ' ' + LTRIM(RTRIM(RAG2))
-                        ELSE ''
-                    END
-                ) LIKE ? THEN 0
+    ),
 
-                WHEN (
-                    LTRIM(RTRIM(RAG1)) +
-                    CASE
-                        WHEN LTRIM(RTRIM(RAG2)) <> '' THEN
-                            ' ' + LTRIM(RTRIM(RAG2))
-                        ELSE ''
-                    END
-                ) LIKE ? THEN 1
+    ParoleRicerca AS (
+        SELECT DISTINCT
+            UPPER(LTRIM(RTRIM(value))) AS parola
 
-                ELSE 2
-            END,
-            RAG1
-    """
+        FROM STRING_SPLIT(?, ' ')
 
-    ricerca = f"%{testo}%"
-    ricerca_inizio = f"{testo}%"
-    ricerca_parola = f"% {testo}%"
+        WHERE
+            LTRIM(RTRIM(value)) <> ''
+    ),
 
-    cursore.execute(
-        query,
-        ricerca,
-        ricerca,
-        ricerca,
-        ricerca_inizio,
-        ricerca_parola,
+    MigliorMatch AS (
+        SELECT
+            c.codice,
+            c.nome,
+            c.indirizzo,
+            pr.parola,
+
+            MAX(
+                CASE
+                    -- Match esatto
+                    WHEN UPPER(LTRIM(RTRIM(d.value))) = pr.parola
+                        THEN 100
+
+                    -- La parola del cliente contiene quella cercata
+                    WHEN UPPER(LTRIM(RTRIM(d.value)))
+                        LIKE '%' + pr.parola + '%'
+                        THEN 90
+
+                    -- La parola cercata contiene quella del cliente,
+                    -- solo se la parola è abbastanza lunga
+                    WHEN LEN(LTRIM(RTRIM(d.value))) >= 4
+                        AND pr.parola
+                            LIKE '%' + UPPER(LTRIM(RTRIM(d.value))) + '%'
+                        THEN 80
+
+                    -- Somiglianza fonetica
+                    WHEN DIFFERENCE(
+                        UPPER(LTRIM(RTRIM(d.value))),
+                        pr.parola
+                    ) = 4
+                        THEN 80
+
+                    WHEN DIFFERENCE(
+                        UPPER(LTRIM(RTRIM(d.value))),
+                        pr.parola
+                    ) = 3
+                        THEN 60
+
+                    ELSE 0
+                END
+            ) AS migliorMatch
+
+        FROM Clienti c
+
+        CROSS JOIN ParoleRicerca pr
+
+        CROSS APPLY (
+            SELECT value
+            FROM STRING_SPLIT(c.nome, ' ')
+            WHERE LTRIM(RTRIM(value)) <> ''
+        ) d
+
+        GROUP BY
+            c.codice,
+            c.nome,
+            c.indirizzo,
+            pr.parola
+    ),
+
+    PunteggioCliente AS (
+        SELECT
+            codice,
+            nome,
+            indirizzo,
+
+            SUM(
+                CASE
+                    WHEN migliorMatch >= 60 THEN 1
+                    ELSE 0
+                END
+            ) AS paroleTrovate,
+
+            SUM(migliorMatch) AS punteggioSQL
+
+        FROM MigliorMatch
+
+        GROUP BY
+            codice,
+            nome,
+            indirizzo
     )
 
-    risultati = []
+    SELECT TOP 50
+        codice,
+        nome,
+        indirizzo,
+        paroleTrovate,
+        punteggioSQL
 
-    for riga in cursore.fetchall():
-        risultati.append({
-            "codice": riga.codice,
-            "codiceMnemonico": riga.codiceMnemonico,
-            "nome": riga.nome.strip(),
-            "indirizzo": riga.indirizzo.strip(),
-        })
+    FROM PunteggioCliente
 
-    cursore.close()
-    connessione.close()
+    WHERE
+        punteggioSQL > 0
+
+    ORDER BY
+        paroleTrovate DESC,
+        punteggioSQL DESC; 
+"""
+
+
+def cerca_clienti(testo: str):
+    ricerca = testo.strip().upper()
+
+    if len(ricerca) < 2:
+        return []
+
+    connessione = get_connection()
+    cursore = connessione.cursor()
+
+    try:
+        cursore.execute(
+            QUERY_CERCA_CLIENTI,
+            ricerca,
+        )
+
+        risultati = []
+
+        risultati = []
+
+        for riga in cursore.fetchall():
+            nome = riga.nome.strip()
+            codice = riga.codice.strip()
+            indirizzo = riga.indirizzo.strip()
+
+            punteggio = calcola_punteggio(
+                ricerca,
+                nome,
+                codice,
+            )
+
+            risultati.append({
+                "codice": codice,
+                "nome": nome,
+                "indirizzo": indirizzo,
+                "_punteggio": punteggio,
+            })
+
+    finally:
+        cursore.close()
+        connessione.close()
+
+    risultati.sort(
+        key=lambda cliente: cliente["_punteggio"],
+        reverse=True,
+    )
+
+    for cliente in risultati:
+        del cliente["_punteggio"]
 
     return risultati

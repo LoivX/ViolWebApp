@@ -44,7 +44,6 @@ export default function FreeArticleSelection({
 
     const articolo: Articolo = {
       codice: "00",
-      codiceMnemonico: "",
       descrizione: descrizionePulita,
       unitaMisura: "PZ",
     };
